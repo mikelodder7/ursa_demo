@@ -1,0 +1,9 @@
+[package]
+name = "ursa_demo"
+version = "0.1.0"
+authors = ["Michael Lodder <redmike7@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+ursa = { version = "0.2", git = "https://github.com/hyperledger/ursa"}
+sha2 = "0.8.0"
