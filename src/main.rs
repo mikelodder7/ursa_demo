@@ -8,10 +8,11 @@ use ursa::bn::BigNumber;
 use ursa::signatures::{
     SignatureScheme,
     ed25519::Ed25519Sha512,
-    secp256k1::EcdsaSecp256k1Sha256
+    secp256k1::EcdsaSecp256k1Sha256,
+    bls::normal,
 };
 use ursa::bls::*;
-
+use amcl_wrapper::group_elem::GroupElement;
 use sha2::Digest;
 
 fn main() {
@@ -151,4 +152,22 @@ fn main() {
     let signature = scheme.sign(message.as_slice(), &private).unwrap();
     let res = scheme.verify(message.as_slice(), signature.as_slice(), &public).unwrap();
     println!("verify = {}", res);
+
+    println!("Demoing Advanced BLS signatures");
+    let mut pks = Vec::new();
+    let mut sigs = Vec::new();
+    let generator = normal::Generator::generator();
+    let msg = b"Hello World!";
+    let ctx = b"";
+    for _ in 0..10 {
+        let (pk, sk) = normal::generate(&generator);
+        let sig = normal::Signature::new(msg, Some(ctx), &sk);
+        pks.push(pk);
+        sigs.push(sig);
+    }
+    let mut asig = sigs[0].clone();
+    asig.combine(&sigs[1..]);
+    let mut apk = pks[0].clone();
+    apk.combine(&pks[1..]);
+    println!("asig verify - {}", asig.verify(msg, Some(ctx), &apk, &generator));
 }
